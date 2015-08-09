@@ -1,5 +1,7 @@
 package com.company;
 
+import com.company.phobjects.PhObject;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -35,11 +37,8 @@ public class Board extends JPanel {
         g2d.setColor(Color.WHITE);
 
         if (model != null) {
-            for (PhModel.Ball ball : model.getBalls()) {
-                g2d.drawOval((int) Math.round(ball.getX()),
-                        (int) Math.round( ball.getY()),
-                        (int) ball.getRadiusX(),
-                        (int) ball.getRadiusY());
+            for (PhObject obj : model.getObjs()) {
+                obj.draw(g);
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.company;
 
+import com.company.phobjects.PhObject;
+import com.company.phobjects.PhObjectFactory;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -10,35 +13,56 @@ import java.util.Random;
 
 public class PhModel {
 
+    private Random r = new Random();
 
     private double left = 0;
     private double right = 1;
     private double top = 1;
     private double bottom = 0;
 
-    private Random r = new Random();
+    private int ballNum;
+    private int wallNum;
 
-    private ArrayList<Ball> balls;
+    private ArrayList<PhObject> objs;
 
     public PhModel() {
         this(10, 0);
     }
 
     public PhModel(int ballNum, int wallNum) {
-        createBalls(ballNum);
+        this.ballNum = ballNum;
+        this.wallNum = wallNum;
+        objs = createBalls(ballNum);
+        objs.addAll(createWalls(wallNum));
     }
 
-    private void createBalls(int ballNum) {
-        balls = new ArrayList<Ball>();
+    private ArrayList<PhObject> createBalls(int ballNum) {
+        ArrayList<PhObject> res = new ArrayList<PhObject>();
         for (int i = 0; i < ballNum; i++) {
-            balls.add(new Ball(this));
+            res.add(PhObjectFactory.createBall(this));
         }
+        return res;
     }
 
+    private ArrayList<PhObject> createWalls(int wallNum) {
+        ArrayList<PhObject> res = new ArrayList<PhObject>();
+        for (int i = 0; i < wallNum; i++) {
+            res.add(PhObjectFactory.createWall(this));
+        }
+        return res;
+    }
+
+    public ArrayList<PhObject> getObjs() {
+        return objs;
+    }
+
+    public Rectangle.Double getBounds() {
+        return new Rectangle.Double(left, bottom, right-left, top-bottom);
+    }
 
     public int tick(long dt) {
-        for (Ball ball : balls) {
-            ball.tick(dt);
+        for (PhObject obj : objs) {
+            obj.tick(dt);
         }
 
         return 0;
@@ -50,76 +74,11 @@ public class PhModel {
         this.top = top;
         this.bottom = bottom;
 
-        createBalls(balls.size());
+        objs = createBalls(ballNum);
+        objs.addAll(createWalls(wallNum));
 
         return 0;
     }
 
-    public ArrayList<Ball> getBalls() {
-        return balls;
-    }
-
-    public class Ball {
-        Point.Double coords;
-        Point.Double vel;
-        Point.Double radius;
-
-        public Ball(PhModel model) {
-            radius = new Point.Double(10, 10);
-
-            double x = (r.nextDouble() * (model.right - model.left - radius.x)) + model.left;
-            double y = (r.nextDouble() * (model.top - model.bottom - radius.y)) + model.bottom;
-            coords = new Point.Double(x, y);
-
-            x = r.nextDouble()*2 - 1;
-            y = r.nextDouble()*2 - 1;
-            x *= 5;
-            y *= 5;
-            vel = new Point.Double(x, y);
-        }
-
-        public double getX() {
-            return coords.x;
-        }
-
-        public double getY() {
-            return coords.y;
-        }
-
-        public double getRadiusX() {
-            return radius.x;
-        }
-
-        public double getRadiusY() {
-            return radius.y;
-        }
-
-        public int tick(long dt) {
-//            System.out.println(vel.x*dt/35.);
-            double dx = vel.x*dt/35.;
-            double dy = vel.y*dt/35.;
-
-            coords.x += dx;
-            coords.y += dy;
-
-            if (coords.x < left || coords.x + radius.x > right) {
-                coords.x -=dx;
-                vel.x *= -1;
-            }
-
-            if (coords.y < bottom || coords.y + radius.y  > top) {
-                coords.y -=dy;
-                vel.y *= -1;
-            }
-
-
-
-            return 0;
-        }
-    }
-
-    public class Wall {
-
-    }
 }
 
