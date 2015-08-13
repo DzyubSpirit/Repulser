@@ -1,5 +1,6 @@
 package com.company;
 
+import com.company.phobjects.PhModel;
 import com.company.phobjects.PhObject;
 
 import javax.swing.*;

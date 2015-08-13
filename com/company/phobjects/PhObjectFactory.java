@@ -1,7 +1,5 @@
 package com.company.phobjects;
 
-import com.company.PhModel;
-
 /**
  * Created by Dzyub_000 on 09.08.2015.
  */

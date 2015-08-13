@@ -8,4 +8,7 @@ import java.awt.*;
 public interface PhObject {
     int tick(long dt);
     int draw(Graphics g);
+    int iteractWithBall(Ball ball);
+    int iteractWithWall(Wall wall);
+
 }

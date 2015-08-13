@@ -1,9 +1,11 @@
 package com.company;
 
+import com.company.phobjects.PhModel;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Random;
 
 /**
  * Created by Dzyub_000 on 06.08.2015.
@@ -45,7 +47,7 @@ public class Main extends JFrame
 
         add(board);
 
-        model = new PhModel(100, 0);
+        model = new PhModel(10, 3);
         model.setSize(0, w, 0, h);
         board.setModel(model);
 

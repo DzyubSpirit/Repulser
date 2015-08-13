@@ -1,7 +1,5 @@
 package com.company.phobjects;
 
-import com.company.PhModel;
-
 import java.awt.*;
 import java.util.Random;
 
@@ -53,6 +51,14 @@ class Wall implements PhObject {
                 (int) start.y,
                 (int) end.x,
                 (int) end.y);
+        return 0;
+    }
+
+    public int iteractWithBall(Ball ball) {
+        return ball.iteractWithWall(this);
+    }
+
+    public int iteractWithWall(Wall wall) {
         return 0;
     }
 }
