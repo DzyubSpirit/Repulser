@@ -29,6 +29,16 @@ class Wall implements PhObject {
         coordsEnd = new Point.Double(endX, endY);
     }
 
+    public int setStart(Point.Double start) {
+        this.coordsStart = start;
+        return 0;
+    }
+
+    public int setEnd(Point.Double end) {
+        this.coordsEnd = end;
+        return 0;
+    }
+
     public Point.Double getStart() {
         return coordsStart;
     }
@@ -54,11 +64,18 @@ class Wall implements PhObject {
         return 0;
     }
 
-    public int iteractWithBall(Ball ball) {
-        return ball.iteractWithWall(this);
+    public int iteractWithBall(Ball ball, long dt) {
+        return ball.iteractWithWall(this, dt);
     }
 
-    public int iteractWithWall(Wall wall) {
+    public int iteractWithRect(Rect rect, long dt) { return rect.iteractWithWall(this, dt); }
+
+    public int iteractWithWall(Wall wall, long dt) {
         return 0;
+    }
+
+    public Wall clone() {
+        Wall wall = new Wall(coordsStart.x, coordsStart.y, coordsEnd.x, coordsEnd.y);
+        return wall;
     }
 }

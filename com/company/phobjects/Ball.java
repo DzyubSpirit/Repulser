@@ -9,7 +9,7 @@ import java.util.Random;
 class Ball implements PhObject {
     Point.Double coords;
     Point.Double vel;
-    double radius;
+    double radius = 10;
 
     PhModel model;
 
@@ -17,7 +17,6 @@ class Ball implements PhObject {
 
     public Ball(PhModel model) {
         this.model = model;
-        radius = 15;
 
         Rectangle.Double bounds = model.getBounds();
 
@@ -25,6 +24,7 @@ class Ball implements PhObject {
                 bounds.getMinX();
         double y = (r.nextDouble() * (bounds.getMaxY() - bounds.getMinY() - radius)) +
                 bounds.getMinY();
+
         coords = new Point.Double(x, y);
 
         x = r.nextDouble()*2 - 1;
@@ -32,6 +32,17 @@ class Ball implements PhObject {
         x *= 5;
         y *= 5;
         vel = new Point.Double(x, y);
+    }
+
+    public Ball(PhModel model, Point.Double coords, Point.Double vel) {
+        this(model, coords, vel, 10);
+    }
+
+    public Ball(PhModel model, Point.Double coords, Point.Double vel, double radius) {
+        this.model = model;
+        this.coords = coords;
+        this.vel = vel;
+        this.radius = radius;
     }
 
     public double getX() {
@@ -78,7 +89,7 @@ class Ball implements PhObject {
         return 0;
     }
 
-    public int iteractWithBall(Ball ball) {
+    public int iteractWithBall(Ball ball, long dt) {
         if (this == ball) {
             return 1;
         }
@@ -107,14 +118,45 @@ class Ball implements PhObject {
         ball.coords.x += ndx*pr;
         ball.coords.y += ndy*pr;
 
-        double o = this.vel.x * ndx + this.vel.y * ndy;
-        this.vel.x -= 2*ndx*o;
-        this.vel.y -= 2*ndy*o;
+//        right reflection
+        double v1 = this.vel.x*ndx + this.vel.y*ndy;
+        this.vel.x -= ndx*v1;
+        this.vel.y -= ndy*v1;
+        double v2 = ball.vel.x*ndx + ball.vel.y*ndy;
+        ball.vel.x -= ndx*v2;
+        ball.vel.y -= ndy*v2;
 
-        o = ball.vel.x * (-ndx) + ball.vel.y * (-ndy);
-        ball.vel.x += 2*ndx*o;
-        ball.vel.y += 2*ndy*o;
+        double m1 = this.radius*this.radius;
+        double m2 = ball.radius*ball.radius;
+        double E = (m1*v1*v1 + m2*v2*v2)/2;
+        double P = m1*v1 + m2*v2;
+        double D = Math.sqrt(m1*m2*(2*E*(m1+m2) - P*P));
+        double nv2, nv1;
+        if (v1 < v2) {
+            nv2 = (P*m2 - D)/m2/(m1+m2);
+        } else {
+            nv2 = (P*m2 + D)/m2/(m1+m2);
+        }
+        nv1 = (P-m2*nv2)/m1;
 
+        this.vel.x += ndx*nv1;
+        this.vel.y += ndy*nv1;
+        ball.vel.x += ndx*nv2;
+        ball.vel.y += ndy*nv2;
+
+
+
+
+//        simple reflection
+//        double o = this.vel.x * ndx + this.vel.y * ndy;
+//        this.vel.x -= 2*ndx*o;
+//        this.vel.y -= 2*ndy*o;
+//
+//        o = ball.vel.x * (-ndx) + ball.vel.y * (-ndy);
+//        ball.vel.x += 2*ndx*o;
+//        ball.vel.y += 2*ndy*o;
+
+//        Don`t decomment
 //        this.vel.x = 0;
 //        this.vel.y = 0;
 //        ball.vel.x = 0;
@@ -123,13 +165,18 @@ class Ball implements PhObject {
         return 0;
     }
 
-    public int iteractWithWall(Wall wall) {
+    public int iteractWithRect(Rect rect, long dt) {
+
+        return 0;
+    }
+
+    public int iteractWithWall(Wall wall, long dt) {
         Point.Double beg = wall.getStart();
         Point.Double end = wall.getEnd();
 
         double wdx = end.x - beg.x;
         double wdy = end.y - beg.y;
-        double wr = Math.sqrt(wdx*wdx + wdy*wdy);
+        double wr = Math.sqrt(wdx * wdx + wdy * wdy);
         double wndx = wdx / wr;
         double wndy = wdy / wr;
 
@@ -139,15 +186,28 @@ class Ball implements PhObject {
         }
         Point.Double inter = new Point.Double(beg.x + wndx*pr, beg.y + wndy*pr);
 
-
-
         double dx = inter.x - this.coords.x;
         double dy = inter.y - this.coords.y;
+        boolean side1 = dx*wndy - dy*wndx >= 0;
+
         double r = Math.sqrt(dx*dx + dy*dy);
 
+        this.tick(dt);
+        double pr2 = (this.coords.x - beg.x)*wndx + (this.coords.y - beg.y)*wndy;
+        Point.Double inter2 = new Point.Double(beg.x + wndx*pr2, beg.y + wndy*pr2);
+
+        double dx2 = inter2.x - this.coords.x;
+        double dy2 = inter2.y - this.coords.y;
+        boolean side2 = dx2*wndy - dy2*wndx >= 0;
+        this.tick(-dt);
+
+        boolean isOneSide = side1 == side2;
+
         double dr = this.radius - r;
-        if (dr < 0) {
-            return 2;
+        if (isOneSide) {
+            if (dr < 0) {
+                return 2;
+            }
         }
 
         dr += 1E-8;
@@ -163,5 +223,10 @@ class Ball implements PhObject {
 //        this.vel.y = 0;
 
         return 0;
+    }
+
+    public Ball clone() {
+        Ball ball = new Ball(model, (Point.Double)coords.clone(), (Point.Double)vel.clone(), radius);
+        return ball;
     }
 }

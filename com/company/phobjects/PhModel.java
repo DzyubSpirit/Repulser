@@ -26,15 +26,23 @@ public class PhModel {
     private ArrayList<PhObject> objs;
     private ArrayList<Ball> balls;
     private ArrayList<Wall> walls;
+    private ArrayList<Rect> rects;
+
+    private PhObjectFactory factory = new PhObjectFactory(new Ball(this), new Wall(this), new Rect(this));
 
     public PhModel() {
-        this(10, 0);
+        this(0, 0);
     }
 
     public PhModel(int ballNum, int wallNum) {
         this.ballNum = ballNum;
         this.wallNum = wallNum;
         createObjects();
+    }
+
+    public int setFactory(PhObjectFactory fact) {
+        this.factory = fact;
+        return 0;
     }
 
     private void createObjects() {
@@ -47,12 +55,43 @@ public class PhModel {
         for (Wall wall : walls) {
             objs.add(wall);
         }
+        rects = new ArrayList<Rect>();
+    }
+
+    public int createBall(Point.Double coords, Point.Double vel) {
+        Ball ball = factory.createBall();
+        ball.coords = coords;
+        ball.vel = vel;
+        balls.add(ball);
+        objs.add(ball);
+        return 0;
+    }
+
+    public int createRect() {
+        Rect rect = factory.createRect();
+        rects.add(rect);
+        objs.add(rect);
+        return 0;
+    }
+
+    public int createRect(Point.Double coords, Point.Double size, double angle) {
+        Rect rect = factory.createRect(coords, size, angle);
+        rects.add(rect);
+        objs.add(rect);
+        return 0;
+    }
+
+    public int createWall(Point.Double start, Point.Double end) {
+        Wall wall = factory.createWall(start, end);
+        walls.add(wall);
+        objs.add(wall);
+        return 0;
     }
 
     private ArrayList<Ball> createBalls(int ballNum) {
         ArrayList<Ball> res = new ArrayList<>();
         for (int i = 0; i < ballNum; i++) {
-            res.add(PhObjectFactory.createBall(this));
+            res.add(factory.createBall(this));
         }
         return res;
     }
@@ -60,7 +99,7 @@ public class PhModel {
     private ArrayList<Wall> createWalls(int wallNum) {
         ArrayList<Wall> res = new ArrayList<>();
         for (int i = 0; i < wallNum; i++) {
-            res.add(PhObjectFactory.createWall(this));
+            res.add(factory.createWall(this));
         }
         return res;
     }
@@ -74,31 +113,34 @@ public class PhModel {
     }
 
     public int tick(long dt) {
-        for (PhObject obj : objs) {
-            obj.tick(dt);
-        }
-
-        double sum = 0;
-        double count = 0;
-        for (Ball ball : balls) {
-            count++;
-            sum += ball.vel.x*ball.vel.x + ball.vel.y*ball.vel.y;
-        }
+//        Counting impulce of all balls
+//        double sum = 0;
+//        double count = 0;
+//        for (Ball ball : balls) {
+//            count++;
+//            sum += ball.vel.x*ball.vel.x + ball.vel.y*ball.vel.y;
+//        }
 
 //        System.out.println(sum / count);
 
+
+//        Iteracting of objects
         for (PhObject obj : objs) {
 
             for (Ball ball : balls) {
-                obj.iteractWithBall(ball);
+                obj.iteractWithBall(ball, dt);
             }
 
             for (Wall wall : walls) {
-                obj.iteractWithWall(wall);
+                obj.iteractWithWall(wall, dt);
             }
         }
 
 
+//        Calculating new coords
+        for (PhObject obj : objs) {
+            obj.tick(dt);
+        }
 
 
         return 0;

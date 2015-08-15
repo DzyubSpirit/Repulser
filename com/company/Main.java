@@ -1,6 +1,7 @@
 package com.company;
 
 import com.company.phobjects.PhModel;
+import com.company.phobjects.PhObjectFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,9 +48,13 @@ public class Main extends JFrame
 
         add(board);
 
-        model = new PhModel(10, 3);
+        model = new PhModel(100, 5);
         model.setSize(0, w, 0, h);
+//        model.createWall(new Point.Double(100, 100), new Point.Double(500, 100));
+//        model.createRect(new Point.Double(300, 300),new Point.Double(100, 100), 0);
+
         board.setModel(model);
+
 
     }
 
